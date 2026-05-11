@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>民意诉求数据分析平台 — 智能数据分析助手</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<style>
+:root{--primary:#2270EF;--primary-hover:#1557CC;--primary-light:#EBF2FF;--primary-ultra:#F5F8FF;--bg:#FFFFFF;--bg-page:#F4F6FA;--bg-hover:#FAFBFD;--border:#E4E8EF;--border-light:#EEF1F6;--text-primary:#111827;--text-secondary:#374151;--text-muted:#6B7280;--text-placeholder:#9CA3AF;--red:#EF4444;--red-light:#FEF2F2;--yellow:#F59E0B;--yellow-light:#FFFBEB;--green:#10B981;--green-light:#ECFDF5;--orange:#FF7D00;--orange-light:#FFF7ED;--purple:#8B5CF6;--purple-light:#F5F3FF;--teal:#0D9488;--teal-light:#F0FDFA;--cyan:#06B6D4;--cyan-light:#ECFEFF;--indigo:#6366F1;--indigo-light:#EEF2FF;--indigo-border:#C7D2FE;--radius-sm:4px;--radius:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow:0 2px 8px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.10);--shadow-lg:0 12px 40px rgba(0,0,0,.14);--transition:.18s ease;--transition-slow:.28s cubic-bezier(.4,0,.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'PingFang SC','Microsoft YaHei',-apple-system,sans-serif;color:var(--text-primary);background:var(--bg-page);height:100vh;overflow:hidden}
+a{text-decoration:none;color:inherit}button{cursor:pointer;border:none;background:none;font-family:inherit;outline:none}input,select,textarea{font-family:inherit;outline:none}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px}
+
+/* LAYOUT */
+.app{display:flex;flex-direction:column;height:100vh}
+.top-bar{height:56px;background:linear-gradient(135deg,#4A7FE5,#5B8DEF,#4A7FE5);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0;box-shadow:0 2px 12px rgba(74,127,229,.25);z-index:100}
+.brand{display:flex;align-items:center;gap:10px}.brand-logo{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center}.brand-logo i{color:#fff;font-size:15px}.brand-name{font-size:15px;font-weight:700;color:#fff}.brand-sub{font-size:10px;color:rgba(255,255,255,.7);margin-top:1px}
+.bc{display:flex;align-items:center;gap:6px;font-size:13px;margin-left:16px}.bc span{color:rgba(255,255,255,.7)}.bc .active{color:#fff;font-weight:500}.bc .sep{color:rgba(255,255,255,.4);font-size:11px}
+.spacer{flex:1}
+.nav-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:rgba(255,255,255,.8);cursor:pointer}.nav-btn:hover{background:rgba(255,255,255,.15);color:#fff}
+.user-info{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;cursor:pointer}.user-info:hover{background:rgba(255,255,255,.12)}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;border:1.5px solid rgba(255,255,255,.3)}.user-name{font-size:13px;font-weight:500;color:#fff}.user-role-text{font-size:11px;color:rgba(255,255,255,.7)}
+.main-area{flex:1;display:flex;overflow:hidden}
+
+/* LEFT SIDEBAR */
+.left-sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.ls-header{padding:16px;border-bottom:1px solid var(--border-light)}
+.ls-new-btn{width:100%;height:38px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--indigo),var(--cyan));color:#fff;border-radius:8px;font-size:13px;font-weight:600;border:none}.ls-new-btn:hover{opacity:.9}
+.ls-search{margin-top:10px;position:relative}.ls-search input{width:100%;height:30px;border:1px solid var(--border);border-radius:6px;padding:0 10px 0 30px;font-size:12px}.ls-search input:focus{border-color:var(--indigo)}.ls-search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-placeholder);font-size:12px;pointer-events:none}
+.ls-section-label{font-size:11px;font-weight:600;color:var(--text-placeholder);padding:12px 16px 6px;letter-spacing:.5px}
+.ls-list{flex:1;overflow-y:auto;padding:0 8px 8px}
+.ls-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:all var(--transition);font-size:12.5px;color:var(--text-secondary);margin-bottom:2px}.ls-item:hover{background:var(--bg-page)}.ls-item.active{background:var(--indigo-light);color:var(--indigo);font-weight:500}
+.ls-item i.conv-icon{width:16px;text-align:center;font-size:13px;color:var(--text-muted)}.ls-item.active i.conv-icon{color:var(--indigo)}
+.ls-item .conv-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ls-item .conv-actions{display:none;gap:2px}.ls-item:hover .conv-actions{display:flex}
+.conv-act-btn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:11px;color:var(--text-muted)}.conv-act-btn:hover{background:var(--bg);color:var(--text-primary)}.conv-act-btn.danger:hover{color:var(--red);background:var(--red-light)}
+.ls-date-label{font-size:10px;color:var(--text-placeholder);padding:8px 10px 4px;font-weight:500}
+.ls-footer{padding:12px 16px;border-top:1px solid var(--border-light);font-size:11px;color:var(--text-placeholder);display:flex;align-items:center;gap:6px}.ls-footer i{font-size:12px;color:var(--indigo)}
+.rename-input{width:100%;height:24px;border:1px solid var(--indigo);border-radius:4px;padding:0 6px;font-size:12px}
+
+/* CENTER */
+.center-chat{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.chat-header-bar{padding:12px 20px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg)}
+.chat-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--cyan));display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
+.chat-title{font-size:14px;font-weight:600}.chat-status{font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px}.chat-status::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%}
+.chat-header-actions{margin-left:auto;display:flex;gap:4px}
+.chat-messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+
+/* MESSAGES */
+.msg{display:flex;gap:10px;align-items:flex-start}.msg.user{flex-direction:row-reverse}
+.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.msg.ai .msg-av{background:linear-gradient(135deg,var(--indigo),var(--cyan));color:#fff}.msg.user .msg-av{background:var(--primary);color:#fff}
+.msg-body{max-width:82%;min-width:0}.msg-bubble{padding:12px 16px;border-radius:12px;font-size:13px;line-height:1.7}
+.msg.ai .msg-bubble{background:var(--bg);border:1px solid var(--border-light);border-bottom-left-radius:4px}
+.msg.user .msg-bubble{background:var(--indigo);color:#fff;border-bottom-right-radius:4px}
+.msg-time{font-size:10px;color:var(--text-placeholder);margin-top:4px}.msg.user .msg-time{text-align:right}
+.msg-actions{display:flex;align-items:center;gap:2px;margin-top:4px}
+.msg-act{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;color:var(--text-muted);cursor:pointer}.msg-act:hover{background:var(--bg-page);color:var(--text-primary)}
+.msg-act.liked{color:var(--green);background:var(--green-light)}.msg-act.disliked{color:var(--red);background:var(--red-light)}
+
+/* THINKING CHAIN */
+.thinking-chain{background:linear-gradient(135deg,#F8F9FE,#F0F4FF);border:1px solid var(--indigo-border);border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:12px;cursor:pointer}
+.tc-title{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--indigo);font-size:12px}
+.tc-body{overflow:hidden;max-height:0;transition:max-height .3s ease}.thinking-chain.open .tc-body{max-height:600px;padding-top:8px}
+.tc-toggle{margin-left:auto;font-size:10px;color:var(--text-placeholder);transition:transform var(--transition)}.thinking-chain.open .tc-toggle{transform:rotate(180deg)}
+.tc-step{display:flex;align-items:flex-start;gap:8px;padding:3px 0;color:var(--text-secondary);line-height:1.6}
+.tc-num{width:18px;height:18px;border-radius:50%;background:var(--indigo);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.tc-step.done .tc-num{background:var(--green)}.tc-step.active .tc-num{animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}50%{box-shadow:0 0 0 6px rgba(99,102,241,0)}}
+
+/* CHART AREA with tabs */
+.chart-area{margin-top:10px;border:1px solid var(--border-light);border-radius:8px;background:var(--bg);overflow:hidden}
+.chart-tabs{display:flex;border-bottom:1px solid var(--border-light);padding:0 12px;background:var(--bg-page)}
+.chart-tab{padding:8px 14px;font-size:11px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}.chart-tab:hover{color:var(--text-primary)}.chart-tab.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+.chart-pane{display:none;padding:12px}.chart-pane.active{display:block}
+.chart-el{width:100%;height:260px}
+.chart-toolbar{display:flex;justify-content:flex-end;gap:4px;padding:0 4px 4px}
+.ct-btn{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:11px;color:var(--text-muted);cursor:pointer}.ct-btn:hover{background:var(--bg-page);color:var(--text-primary)}
+
+/* PANORAMA ANALYSIS MODULE */
+.panorama-section{margin-top:14px;border:1px solid var(--border-light);border-radius:8px;overflow:hidden;background:var(--bg)}
+.panorama-tabs{display:flex;border-bottom:1px solid var(--border-light);padding:0 16px;background:var(--bg-page)}
+.panorama-tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px}.panorama-tab:hover{color:var(--text-primary)}.panorama-tab.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+.panorama-pane{display:none;padding:16px}.panorama-pane.active{display:block}
+.panorama-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pano-card{border:1px solid var(--border-light);border-radius:8px;overflow:hidden;background:var(--bg)}
+.pano-card-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border-light);background:var(--bg-page)}
+.pano-card-title{font-size:12px;font-weight:600;color:var(--text-primary)}
+.pano-card-actions{display:flex;gap:2px}
+.pano-chart{height:220px}
+
+/* DETAIL TABLE section */
+.detail-section{margin-top:14px;border:1px solid var(--border-light);border-radius:8px;overflow:hidden;background:var(--bg)}
+.detail-header{padding:12px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.detail-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.detail-filters{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.detail-filter{height:28px;border:1px solid var(--border);border-radius:6px;padding:0 24px 0 8px;font-size:11px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 6px center;-webkit-appearance:none;appearance:none;cursor:pointer}
+.detail-table{width:100%;border-collapse:collapse;font-size:12px}
+.detail-table th{padding:8px 10px;background:var(--bg-page);font-weight:600;color:var(--text-muted);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.detail-table td{padding:8px 10px;border-bottom:1px solid var(--border-light);color:var(--text-primary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detail-table tbody tr:hover{background:var(--primary-ultra)}
+.detail-table tbody tr:last-child td{border-bottom:none}
+.detail-pagination{padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border-light)}
+
+/* RESULT TABLE */
+.result-table-wrap{margin-top:10px;border:1px solid var(--border-light);border-radius:8px;overflow:hidden}
+.result-table{width:100%;border-collapse:collapse;font-size:12px}
+.result-table th{padding:8px 12px;background:var(--bg-page);font-weight:600;color:var(--text-muted);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.result-table td{padding:8px 12px;border-bottom:1px solid var(--border-light)}.result-table tbody tr:last-child td{border-bottom:none}.result-table tbody tr:hover{background:var(--primary-ultra)}
+.total-row{background:var(--bg-page);font-weight:600}
+.drill-link{color:var(--indigo);cursor:pointer;font-weight:500}.drill-link:hover{text-decoration:underline}
+
+/* REPORT CARD */
+.report-card{margin-top:10px;background:linear-gradient(135deg,#F8FAFF,#EEF2FF);border:1px solid var(--indigo-border);border-radius:8px;padding:16px}
+.rc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.rc-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--indigo),var(--cyan));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.rc-title{font-size:14px;font-weight:600}.rc-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+.rc-outline{margin:12px 0;padding:10px 14px;background:rgba(255,255,255,.7);border-radius:6px;font-size:12px;color:var(--text-secondary);line-height:1.8}
+.rc-actions{display:flex;gap:8px;margin-top:12px}
+/* Report streaming content */
+.report-stream{margin-top:10px;font-size:13px;line-height:1.8;color:var(--text-primary)}
+.report-stream h4{font-size:13px;font-weight:600;color:var(--indigo);margin:10px 0 4px;display:flex;align-items:center;gap:6px}
+.report-stream p{margin-bottom:6px}
+
+/* INPUT AREA */
+.recommend-chips{padding:6px 24px 2px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.rec-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition);background:var(--bg);white-space:nowrap}.rec-chip:hover{border-color:var(--indigo);color:var(--indigo);background:var(--indigo-light)}.rec-chip i{font-size:11px;color:var(--indigo)}
+.chat-input-area{padding:12px 24px 16px;flex-shrink:0;border-top:1px solid var(--border-light);background:var(--bg)}
+.input-row{display:flex;gap:8px;align-items:center}
+.chat-input{flex:1;height:42px;border:1px solid var(--border);border-radius:8px;padding:0 14px;font-size:13px}.chat-input:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.chat-send{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,var(--indigo),var(--cyan));color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;flex-shrink:0}.chat-send:hover{opacity:.85}
+
+/* RIGHT PANEL */
+.right-panel{width:300px;background:var(--bg);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.rp-header{padding:14px 16px;border-bottom:1px solid var(--border-light);font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rp-body{flex:1;overflow-y:auto;padding:8px}
+.qa-card{margin-bottom:8px;background:var(--bg-page);border-radius:8px;overflow:hidden}
+.qa-card-header{padding:10px 12px;font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+.qa-card-header i:first-child{font-size:11px;color:var(--indigo)}
+.qa-card-header .qa-add{margin-left:auto;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:10px;color:var(--text-muted);cursor:pointer}.qa-card-header .qa-add:hover{background:var(--indigo-light);color:var(--indigo)}
+.qa-card-body{padding:0 8px 8px}
+.qa-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;transition:all var(--transition);font-size:12px;color:var(--text-secondary);margin-bottom:2px;position:relative}
+.qa-btn:hover{background:var(--indigo-light);color:var(--indigo)}.qa-btn i:first-child{width:14px;text-align:center;font-size:11px;color:var(--text-muted)}.qa-btn:hover i:first-child{color:var(--indigo)}
+.qa-btn .qa-ops{display:none;gap:2px;margin-left:auto;flex-shrink:0}.qa-btn:hover .qa-ops{display:flex}
+.qa-op{width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:3px;font-size:9px;color:var(--text-muted)}.qa-op:hover{background:var(--bg);color:var(--text-primary)}.qa-op.del:hover{color:var(--red)}
+.fav-section{margin-top:4px}.fav-header{padding:10px 12px;font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+.fav-header .fav-cnt{margin-left:auto;font-size:11px;font-weight:500;color:var(--text-placeholder)}
+.fav-list{padding:0 4px}.fav-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;transition:all var(--transition);font-size:12px;color:var(--text-secondary);margin-bottom:2px}
+.fav-item:hover{background:var(--indigo-light);color:var(--indigo)}
+.fav-item i.star{color:var(--yellow);font-size:11px;flex-shrink:0}.fav-item .fav-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fav-item .fav-ops{display:none;gap:2px}.fav-item:hover .fav-ops{display:flex}
+.fav-op{width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:3px;font-size:9px;color:var(--text-muted)}.fav-op:hover{background:var(--bg);color:var(--text-primary)}.fav-op.del:hover{color:var(--red)}
+.fav-empty{padding:20px;text-align:center;font-size:12px;color:var(--text-placeholder)}.fav-empty i{font-size:24px;margin-bottom:6px;display:block}
+
+/* BUTTONS/TAGS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);white-space:nowrap;border:1px solid transparent}
+.btn-sm{height:26px;padding:0 10px;font-size:12px}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-primary:hover{background:var(--primary-hover)}
+.btn-default{background:var(--bg);color:var(--text-secondary);border-color:var(--border)}.btn-default:hover{border-color:#C5CDD9;background:var(--bg-page)}
+.btn-gradient{background:linear-gradient(135deg,var(--indigo),var(--cyan));color:#fff;border:none}.btn-gradient:hover{opacity:.9}
+.btn-outline-indigo{background:transparent;color:var(--indigo);border-color:var(--indigo)}.btn-outline-indigo:hover{background:var(--indigo-light)}
+.btn-ghost{background:transparent;color:var(--text-muted)}.btn-ghost:hover{background:var(--bg-page);color:var(--text-primary)}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.tag-green{background:var(--green-light);color:#065F46}.tag-warn{background:var(--yellow-light);color:#92400E}.tag-danger{background:var(--red-light);color:#991B1B}.tag-indigo{background:var(--indigo-light);color:var(--indigo)}.tag-orange{background:var(--orange-light);color:#9A3412}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity var(--transition)}.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--bg);border-radius:16px;box-shadow:var(--shadow-lg);max-width:95vw;max-height:90vh;display:flex;flex-direction:column;transform:translateY(20px) scale(.97);transition:transform var(--transition-slow)}.modal-overlay.show .modal{transform:none}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.modal-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}.modal-icon.info{background:var(--indigo-light);color:var(--indigo)}
+.modal-title{font-size:16px;font-weight:700;flex:1}
+.modal-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text-muted);cursor:pointer;margin-left:auto}.modal-close:hover{background:var(--bg-page)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}.modal-footer{padding:16px 24px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.fg{margin-bottom:14px}.form-label{font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;display:block}
+.form-control{width:100%;height:34px;border:1px solid var(--border);border-radius:6px;padding:0 12px;font-size:13px}.form-control:focus{border-color:var(--indigo)}
+.form-select{width:100%;height:34px;border:1px solid var(--border);border-radius:6px;padding:0 28px 0 12px;font-size:13px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;-webkit-appearance:none}
+
+.typing{display:flex;gap:4px;padding:6px 0}.typing span{width:6px;height:6px;background:var(--text-placeholder);border-radius:50%;animation:bounce .6s infinite alternate}.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{to{transform:translateY(-6px);opacity:.4}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.stream-in{animation:fadeInUp .3s ease forwards}
+
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:500}.status-badge::before{content:'';width:5px;height:5px;border-radius:50%}
+.badge-pending{background:var(--yellow-light);color:#92400E}.badge-pending::before{background:var(--yellow)}
+.badge-processing{background:var(--primary-light);color:var(--primary)}.badge-processing::before{background:var(--primary)}
+.badge-done{background:var(--green-light);color:#065F46}.badge-done::before{background:var(--green)}
+
+#g_toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px);background:#1F2937;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:8px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:var(--shadow-lg)}
+
+/* Report preview modal */
+.report-preview{font-size:13px;line-height:2;color:var(--text-primary);padding:20px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-family:'SimSun','宋体',serif}
+.report-preview h2{text-align:center;font-size:18px;font-weight:700;margin-bottom:16px;letter-spacing:2px}
+.report-preview h3{font-size:14px;font-weight:700;margin:14px 0 6px;border-bottom:1px solid var(--border-light);padding-bottom:4px}
+.report-preview p{text-indent:2em;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top-bar">
+  <div class="brand"><div class="brand-logo"><i class="fa-solid fa-landmark"></i></div><div><div class="brand-name">民意诉求数据分析平台</div><div class="brand-sub">PUBLIC OPINION DATA ANALYTICS</div></div></div>
+  <div class="bc"><span>数据中心</span><span class="sep"><i class="fa-solid fa-chevron-right"></i></span><span class="active">智能数据分析助手</span></div>
+  <div class="spacer"></div>
+  <div class="nav-btn"><i class="fa-solid fa-magnifying-glass"></i></div>
+  <div class="nav-btn" style="position:relative"><i class="fa-solid fa-bell"></i><span style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid rgba(74,127,229,.9)"></span></div>
+  <div class="user-info"><div class="user-avatar">张</div><div><div class="user-name">张伟</div><div class="user-role-text">数据分析主管</div></div></div>
+</div>
+<div class="main-area">
+
+<!-- LEFT -->
+<div class="left-sidebar">
+  <div class="ls-header">
+    <button class="ls-new-btn" onclick="newConv()"><i class="fa-solid fa-plus"></i> 新建对话</button>
+    <div class="ls-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="搜索历史对话…" oninput="filterConv(this.value)"></div>
+  </div>
+  <div class="ls-section-label">历史对话</div>
+  <div class="ls-list" id="convList"></div>
+  <div class="ls-footer"><i class="fa-solid fa-brain"></i> 基于大模型的智能分析引擎 v2.0</div>
+</div>
+
+<!-- CENTER -->
+<div class="center-chat">
+  <div class="chat-header-bar">
+    <div class="chat-avatar"><i class="fa-solid fa-brain"></i></div>
+    <div><div class="chat-title">数据分析助手</div><div class="chat-status">AI 在线</div></div>
+    <div class="chat-header-actions">
+      <button class="btn btn-sm btn-default" onclick="clearChat()" title="清空"><i class="fa-solid fa-trash-can"></i></button>
+      <button class="btn btn-sm btn-default" id="chartModeBtn" onclick="toggleChartMode()" title="切换图表/表格"><i class="fa-solid fa-chart-column"></i></button>
+    </div>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="recommend-chips" id="recChips">
+    <div class="rec-chip" onclick="sendQuick('本月诉求服务总量是多少？')"><i class="fa-solid fa-calculator"></i>本月诉求服务总量</div>
+    <div class="rec-chip" onclick="sendQuick('本月各类型诉求占比分析')"><i class="fa-solid fa-chart-pie"></i>诉求类型分布</div>
+    <div class="rec-chip" onclick="sendQuick('近6个月诉求量变化趋势')"><i class="fa-solid fa-chart-line"></i>诉求趋势分析</div>
+    <div class="rec-chip" onclick="sendQuick('请生成本月消防安全相关诉求报告')"><i class="fa-solid fa-file-lines"></i>消防安全报告</div>
+    <div class="rec-chip" onclick="sendQuick('各区域诉求响应时效对比')"><i class="fa-solid fa-ranking-star"></i>响应时效排名</div>
+  </div>
+  <div class="chat-input-area">
+    <div class="input-row">
+      <button class="btn btn-sm btn-ghost" onclick="addFavorite()" title="收藏" style="font-size:15px;color:var(--yellow)"><i class="fa-regular fa-star"></i></button>
+      <input class="chat-input" id="chatInput" placeholder="输入你的数据问题，如：本月诉求服务总量？" onkeydown="if(event.key==='Enter')sendMsg()">
+      <div class="chat-send" onclick="sendMsg()"><i class="fa-solid fa-paper-plane"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right-panel">
+  <div class="rp-header"><i class="fa-solid fa-bolt" style="color:var(--yellow)"></i> 快捷指令</div>
+  <div class="rp-body" id="rpBody"></div>
+</div>
+
+</div></div>
+
+<!-- DRILL MODAL -->
+<div class="modal-overlay" id="drillModal"><div class="modal" style="width:820px">
+  <div class="modal-header"><div class="modal-icon info"><i class="fa-solid fa-list-check"></i></div><span class="modal-title" id="drillTitle">工单明细</span><div class="modal-close" onclick="closeM('drillModal')"><i class="fa-solid fa-xmark"></i></div></div>
+  <div class="modal-body" id="drillBody"></div>
+  <div class="modal-footer"><button class="btn btn-default" onclick="closeM('drillModal')">关闭</button><button class="btn btn-gradient" onclick="closeM('drillModal');toast('导出中…','info')"><i class="fa-solid fa-download"></i> 导出明细</button></div>
+</div></div>
+
+<!-- EDIT MODAL (for quick commands & favorites) -->
+<div class="modal-overlay" id="editModal"><div class="modal" style="width:460px">
+  <div class="modal-header"><div class="modal-icon info"><i class="fa-solid fa-pen"></i></div><span class="modal-title" id="editModalTitle">编辑指令</span><div class="modal-close" onclick="closeM('editModal')"><i class="fa-solid fa-xmark"></i></div></div>
+  <div class="modal-body"><div class="fg"><label class="form-label">指令内容</label><input class="form-control" id="editInput"></div></div>
+  <div class="modal-footer"><button class="btn btn-default" onclick="closeM('editModal')">取消</button><button class="btn btn-gradient" onclick="saveEdit()">保存</button></div>
+</div></div>
+
+<!-- ADD QUICK CMD MODAL -->
+<div class="modal-overlay" id="addQaModal"><div class="modal" style="width:460px">
+  <div class="modal-header"><div class="modal-icon info"><i class="fa-solid fa-plus"></i></div><span class="modal-title">新增快捷指令</span><div class="modal-close" onclick="closeM('addQaModal')"><i class="fa-solid fa-xmark"></i></div></div>
+  <div class="modal-body">
+    <div class="fg"><label class="form-label">所属分类</label><select class="form-select" id="addQaCat"><option value="stat">数据统计</option><option value="trend">趋势分析</option><option value="report">报告生成</option></select></div>
+    <div class="fg"><label class="form-label">指令内容</label><input class="form-control" id="addQaText" placeholder="如：本月诉求总量是多少？"></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-default" onclick="closeM('addQaModal')">取消</button><button class="btn btn-gradient" onclick="saveAddQa()">添加</button></div>
+</div></div>
+
+<!-- REPORT PREVIEW MODAL -->
+<div class="modal-overlay" id="reportPreviewModal"><div class="modal" style="width:780px">
+  <div class="modal-header"><div class="modal-icon info"><i class="fa-solid fa-file-lines"></i></div><span class="modal-title">报告预览</span><div class="modal-close" onclick="closeM('reportPreviewModal')"><i class="fa-solid fa-xmark"></i></div></div>
+  <div class="modal-body" id="reportPreviewBody"></div>
+  <div class="modal-footer"><button class="btn btn-default" onclick="closeM('reportPreviewModal')">关闭</button><button class="btn btn-gradient" onclick="toast('报告下载中…','success')"><i class="fa-solid fa-download"></i> 下载报告</button></div>
+</div></div>
+
+<div id="g_toast"><i class="fa-solid fa-circle-check" id="g_toastIcon" style="color:var(--green)"></i><span id="g_toastMsg"></span></div>
+
+<script>
+function openM(id){document.getElementById(id).classList.add('show')}
+function closeM(id){document.getElementById(id).classList.remove('show')}
+document.querySelectorAll('.modal-overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('show')})});
+function toast(m,t){t=t||'success';var el=document.getElementById('g_toast'),ic=document.getElementById('g_toastIcon');document.getElementById('g_toastMsg').textContent=m;var iM={success:'fa-circle-check',warn:'fa-triangle-exclamation',danger:'fa-circle-xmark',info:'fa-circle-info'},cM={success:'var(--green)',warn:'var(--yellow)',danger:'var(--red)',info:'var(--primary)'};ic.className='fa-solid '+(iM[t]||iM.info);ic.style.color=cM[t]||cM.info;el.style.opacity='1';el.style.transform='translateX(-50%) translateY(0)';clearTimeout(el._t);el._t=setTimeout(function(){el.style.opacity='0';el.style.transform='translateX(-50%) translateY(20px)'},3200)}
+function now(){var d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
+function uid(){return 'c'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
+
+/* ========== CONVERSATIONS ========== */
+var convs=[{id:'conv_1',name:'本月诉求服务总量分析',date:'今天',msgs:[]},{id:'conv_2',name:'消防安全诉求专题报告',date:'今天',msgs:[]},{id:'conv_3',name:'各区域响应时效趋势',date:'昨天',msgs:[]},{id:'conv_4',name:'超时工单下钻分析',date:'昨天',msgs:[]},{id:'conv_5',name:'物业服务质量报告',date:'近7天',msgs:[]}];
+var activeId=null;
+
+function renderConvs(f){
+  var el=document.getElementById('convList'),html='',groups={};
+  convs.forEach(function(c){if(f&&c.name.indexOf(f)===-1)return;if(!groups[c.date])groups[c.date]=[];groups[c.date].push(c)});
+  for(var d in groups){html+='<div class="ls-date-label">'+d+'</div>';groups[d].forEach(function(c){html+='<div class="ls-item'+(c.id===activeId?' active':'')+'" onclick="switchConv(\''+c.id+'\')"><i class="fa-solid fa-message conv-icon"></i><span class="conv-name" id="nm_'+c.id+'">'+c.name+'</span><div class="conv-actions"><div class="conv-act-btn" onclick="event.stopPropagation();startRename(\''+c.id+'\')"><i class="fa-solid fa-pen"></i></div><div class="conv-act-btn danger" onclick="event.stopPropagation();delConv(\''+c.id+'\')"><i class="fa-solid fa-trash"></i></div></div></div>'})}
+  el.innerHTML=html;
+}
+function switchConv(id){activeId=id;renderConvs();var c=convs.find(function(x){return x.id===id});if(c){var b=document.getElementById('chatMessages');b.innerHTML='';if(!c.msgs.length)showWelcome();else c.msgs.forEach(function(m){if(m.t==='u')addUserDirect(m.x);else addAiDirect(m.x)})}}
+function newConv(){var id=uid();convs.unshift({id:id,name:'新对话',date:'今天',msgs:[]});activeId=id;renderConvs();showWelcome()}
+function delConv(id){convs=convs.filter(function(c){return c.id!==id});if(activeId===id){activeId=null;showWelcome()}renderConvs();toast('已删除','info')}
+function startRename(id){var el=document.getElementById('nm_'+id);if(!el)return;var c=convs.find(function(x){return x.id===id});el.innerHTML='<input class="rename-input" value="'+c.name+'" onkeydown="if(event.key===\'Enter\')finishRename(\''+id+'\',this.value)" onblur="finishRename(\''+id+'\',this.value)" autofocus>';el.querySelector('input').focus()}
+function finishRename(id,v){v=v.trim()||'未命名';var c=convs.find(function(x){return x.id===id});if(c)c.name=v;renderConvs();toast('已重命名','success')}
+function filterConv(v){renderConvs(v)}
+
+function showWelcome(){var b=document.getElementById('chatMessages');b.innerHTML='';var d=document.createElement('div');d.className='msg ai';d.innerHTML='<div class="msg-av"><i class="fa-solid fa-brain"></i></div><div class="msg-body"><div class="msg-bubble">你好！我是<strong>智能数据分析助手</strong>，可以帮你快速获取数据洞察：<br><br>📊 <strong>数据查询</strong> — 用自然语言查询任意指标，如"2026年3月份平台诉求服务总量"<br>📈 <strong>趋势分析</strong> — 自动生成多维图表，支持指标下钻<br>📝 <strong>报告生成</strong> — 一键生成专题分析报告，如"2025年消防安全专题报告"，支持公文格式下载<br>🔍 <strong>明细穿透</strong> — 点击任意数据指标，下钻查看工单明细<br><br>请输入你的问题，或点击下方推荐指令快速开始。</div><div class="msg-time">09:00</div></div>';b.appendChild(d)}
+
+var chartMode='chart';
+function toggleChartMode(){chartMode=chartMode==='chart'?'table':'chart';document.getElementById('chartModeBtn').innerHTML=chartMode==='chart'?'<i class="fa-solid fa-chart-column"></i>':'<i class="fa-solid fa-table"></i>';toast('已切换为'+(chartMode==='chart'?'图表':'表格')+'优先','info')}
+function clearChat(){document.getElementById('chatMessages').innerHTML='';var d=document.createElement('div');d.className='msg ai';d.innerHTML='<div class="msg-av"><i class="fa-solid fa-brain"></i></div><div class="msg-body"><div class="msg-bubble">对话已清空。有什么数据问题可以问我？</div><div class="msg-time">'+now()+'</div></div>';document.getElementById('chatMessages').appendChild(d);toast('已清空','info')}
+
+/* ========== MESSAGES ========== */
+function addUser(t){if(!activeId)newConv();var b=document.getElementById('chatMessages'),d=document.createElement('div');d.className='msg user stream-in';d.innerHTML='<div class="msg-av">张</div><div class="msg-body"><div class="msg-bubble">'+t+'</div><div class="msg-time">'+now()+'</div></div>';b.appendChild(d);b.scrollTop=b.scrollHeight;var c=convs.find(function(x){return x.id===activeId});if(c){c.msgs.push({t:'u',x:t});if(c.name==='新对话'){c.name=t.slice(0,20);renderConvs()}}}
+function addUserDirect(t){var b=document.getElementById('chatMessages'),d=document.createElement('div');d.className='msg user';d.innerHTML='<div class="msg-av">张</div><div class="msg-body"><div class="msg-bubble">'+t+'</div><div class="msg-time">'+now()+'</div></div>';b.appendChild(d)}
+function addAiDirect(h){var b=document.getElementById('chatMessages'),d=document.createElement('div');d.className='msg ai';d.innerHTML='<div class="msg-av"><i class="fa-solid fa-brain"></i></div><div class="msg-body"><div class="msg-bubble">'+h+'</div><div class="msg-time">'+now()+'</div></div>';b.appendChild(d)}
+
+function addAi(steps,content,afterFn){
+  var b=document.getElementById('chatMessages'),d=document.createElement('div');d.className='msg ai stream-in';
+  d.innerHTML='<div class="msg-av"><i class="fa-solid fa-brain"></i></div><div class="msg-body"><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>';
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+  var bubble=d.querySelector('.msg-bubble'),body=d.querySelector('.msg-body');
+  setTimeout(function(){
+    bubble.innerHTML='<div class="thinking-chain open" onclick="this.classList.toggle(\'open\')"><div class="tc-title"><i class="fa-solid fa-cog fa-spin"></i> 思维链推理 <span class="tc-toggle"><i class="fa-solid fa-chevron-down"></i></span></div><div class="tc-body"></div></div>';
+    var cb=bubble.querySelector('.tc-body'),idx=0;
+    function step(){
+      if(idx>=steps.length){setTimeout(function(){
+        cb.querySelectorAll('.tc-step').forEach(function(s){s.classList.add('done');s.classList.remove('active')});
+        var tc=bubble.querySelector('.thinking-chain');tc.querySelector('.tc-title').innerHTML='<i class="fa-solid fa-circle-check" style="color:var(--green)"></i> 分析完成 · 共'+steps.length+'步 <span class="tc-toggle"><i class="fa-solid fa-chevron-down"></i></span>';tc.classList.remove('open');
+        bubble.insertAdjacentHTML('beforeend',content);
+        body.insertAdjacentHTML('beforeend','<div class="msg-actions"><div class="msg-act" title="点赞" onclick="this.classList.toggle(\'liked\');toast(\'感谢反馈\',\'success\')"><i class="fa-regular fa-thumbs-up"></i></div><div class="msg-act" title="点踩" onclick="this.classList.toggle(\'disliked\');toast(\'感谢反馈\',\'info\')"><i class="fa-regular fa-thumbs-down"></i></div><div class="msg-act" title="复制" onclick="var t=this.closest(\'.msg-body\').querySelector(\'.msg-bubble\').innerText;navigator.clipboard&&navigator.clipboard.writeText(t);toast(\'已复制\',\'success\')"><i class="fa-regular fa-copy"></i></div><div class="msg-act" title="收藏" onclick="actFavLast()"><i class="fa-regular fa-star"></i></div></div>');
+        body.insertAdjacentHTML('beforeend','<div class="msg-time">'+now()+'</div>');
+        b.scrollTop=b.scrollHeight;if(afterFn)afterFn(bubble);
+        if(activeId){var c=convs.find(function(x){return x.id===activeId});if(c)c.msgs.push({t:'a',x:bubble.innerHTML})}
+      },400);return}
+      cb.insertAdjacentHTML('beforeend','<div class="tc-step active"><div class="tc-num">'+(idx+1)+'</div><div class="tc-text">'+steps[idx]+'</div></div>');
+      var all=cb.querySelectorAll('.tc-step');for(var i=0;i<all.length-1;i++){all[i].classList.add('done');all[i].classList.remove('active')}
+      b.scrollTop=b.scrollHeight;idx++;setTimeout(step,400+Math.random()*250);
+    }
+    step();
+  },700);
+}
+function actFavLast(){var msgs=document.querySelectorAll('.msg.user .msg-bubble');if(!msgs.length)return;var t=msgs[msgs.length-1].textContent.trim();if(t&&favorites.indexOf(t)===-1){favorites.push(t);renderFavs();toast('已收藏','success')}else toast('已收藏过','warn')}
+
+/* ========== PANORAMA ANALYSIS (全景分析) ========== */
+function buildPanorama(){
+  var pid='p'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+  var hotwords=['物业服务','噪音扰民','道路维修','消防安全','垃圾清运','停车管理','绿化养护','水电维修','违建投诉','电梯故障','环境卫生','社区治理','交通安全','施工噪音','漏水问题'];
+
+  var html='<div class="panorama-section"><div class="panorama-tabs">';
+  html+='<div class="panorama-tab active" onclick="switchPanoTab(this,\''+pid+'-overview\')"><i class="fa-solid fa-table-cells"></i> 检索结果</div>';
+  html+='<div class="panorama-tab" onclick="switchPanoTab(this,\''+pid+'-all\')"><i class="fa-solid fa-chart-pie"></i> 全景分析</div>';
+  html+='</div>';
+
+  // Pane 1: 检索结果
+  html+='<div class="panorama-pane active" id="'+pid+'-overview">';
+  html+=buildDetailTable();
+  html+='</div>';
+
+  // Pane 2: 全景分析
+  html+='<div class="panorama-pane" id="'+pid+'-all">';
+  html+='<div class="panorama-grid">';
+  html+='<div class="pano-card"><div class="pano-card-header"><span class="pano-card-title">诉求类型分布</span><div class="pano-card-actions"><div class="ct-btn" onclick="toast(\'放大查看\',\'info\')" title="放大"><i class="fa-solid fa-expand"></i></div><div class="ct-btn" onclick="toast(\'图片下载中…\',\'info\')" title="下载"><i class="fa-solid fa-download"></i></div></div></div><div class="pano-chart" id="'+pid+'_type_pie"></div></div>';
+  html+='<div class="pano-card"><div class="pano-card-header"><span class="pano-card-title">诉求来源分布</span><div class="pano-card-actions"><div class="ct-btn" onclick="toast(\'放大查看\',\'info\')"><i class="fa-solid fa-expand"></i></div><div class="ct-btn" onclick="toast(\'图片下载中…\',\'info\')"><i class="fa-solid fa-download"></i></div></div></div><div class="pano-chart" id="'+pid+'_source_pie"></div></div>';
+  html+='<div class="pano-card"><div class="pano-card-header"><span class="pano-card-title">各地区工单数量</span><div class="pano-card-actions"><div class="ct-btn" onclick="toast(\'放大查看\',\'info\')"><i class="fa-solid fa-expand"></i></div><div class="ct-btn" onclick="toast(\'图片下载中…\',\'info\')"><i class="fa-solid fa-download"></i></div></div></div><div class="pano-chart" id="'+pid+'_area_bar"></div></div>';
+  html+='<div class="pano-card"><div class="pano-card-header"><span class="pano-card-title">地区与工单类型热力图</span><div class="pano-card-actions"><div class="ct-btn" onclick="toast(\'放大查看\',\'info\')"><i class="fa-solid fa-expand"></i></div><div class="ct-btn" onclick="toast(\'图片下载中…\',\'info\')"><i class="fa-solid fa-download"></i></div></div></div><div class="pano-chart" id="'+pid+'_area_heat"></div></div>';
+  html+='</div>';
+  // Hotword cloud
+  html+='<div class="pano-card" style="margin-top:12px"><div class="pano-card-header"><span class="pano-card-title">热词分析（词云图）</span><div class="pano-card-actions"><div class="ct-btn" onclick="toast(\'放大查看\',\'info\')"><i class="fa-solid fa-expand"></i></div><div class="ct-btn" onclick="toast(\'图片下载中…\',\'info\')"><i class="fa-solid fa-download"></i></div></div></div>';
+  html+='<div style="padding:20px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;min-height:180px">';
+  var sizes=[28,24,22,20,18,17,16,15,14,14,13,13,12,12,11];
+  var colors=['#6366F1','#EF4444','#06B6D4','#F59E0B','#10B981','#8B5CF6','#2270EF','#FF7D00','#0D9488','#EC4899'];
+  hotwords.forEach(function(w,i){html+='<span style="font-size:'+sizes[i]+'px;font-weight:'+(i<5?700:500)+';color:'+colors[i%colors.length]+';padding:4px 8px;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'scale(1.15)\'" onmouseout="this.style.transform=\'scale(1)\'">'+w+'</span>'});
+  html+='</div></div>';
+  html+='</div>';
+  html+='</div>';
+  return html;
+}
+
+function buildDetailTable(){
+  var rows=[
+    {no:'AP993205832602010',tm:'2026-04-01 15:54',area:'开发区',type:'求助',src:'电话',content:'服务对象反映：车库装充电桩，供电局申请新能源电表…',dept:'物业服务问题',kw:'物业,诉求,车库'},
+    {no:'ZB058326020210',tm:'2026-04-01 21:59',area:'开发区',type:'求助',src:'电话',content:'报警人称：两个物业和一个业主上门吵闹，因为噪音…',dept:'物业服务问题',kw:'物业,噪音,问题'},
+    {no:'ZB058326020220',tm:'2026-04-02 12:55',area:'开发区',type:'求助',src:'互联网',content:'兵希世茂新界物业办公室楼上漏水到自己家…',dept:'物业服务问题',kw:'物业,漏水,维修'},
+    {no:'ZB058326020230',tm:'2026-04-02 13:07',area:'高新区',type:'投诉举报',src:'电话',content:'中南世纪城20栋楼下物业保安锁住了自己的车子…',dept:'物业服务问题',kw:'物业,停车,投诉'},
+    {no:'ZB058326020240',tm:'2026-04-02 13:10',area:'高新区',type:'咨询',src:'承办转办',content:'晨曦北院物业办公室汽车电瓶和电线被物业拿走…',dept:'物业服务问题',kw:'物业,电瓶'},
+    {no:'ZB058326020250',tm:'2026-04-03 09:30',area:'千灯镇',type:'意见建议',src:'互联网',content:'建议加强小区绿化养护管理，提升居住环境品质…',dept:'绿化养护',kw:'绿化,养护,环境'},
+  ];
+  var html='<div style="padding:12px 16px"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center">';
+  html+='<select class="detail-filter"><option>全部区域</option><option>开发区</option><option>高新区</option><option>千灯镇</option><option>花桥经济开发区</option><option>陆家镇</option></select>';
+  html+='<select class="detail-filter"><option>全部类型</option><option>咨询</option><option>求助</option><option>投诉举报</option><option>意见建议</option><option>其他</option></select>';
+  html+='<select class="detail-filter"><option>全部渠道</option><option>电话</option><option>互联网</option><option>承办转办</option><option>其他</option></select>';
+  html+='<button class="btn btn-sm btn-primary" onclick="toast(\'查询中…\',\'info\')"><i class="fa-solid fa-magnifying-glass"></i> 查询</button>';
+  html+='<div style="margin-left:auto;display:flex;gap:4px;align-items:center"><button class="btn btn-sm btn-outline-indigo" onclick="toast(\'导出Excel中…\',\'info\')"><i class="fa-solid fa-file-excel"></i> 导出</button><div class="ct-btn" onclick="toast(\'放大查看\',\'info\')"><i class="fa-solid fa-expand"></i></div></div>';
+  html+='</div>';
+  html+='<div style="font-size:12px;color:var(--indigo);font-weight:500;margin-bottom:10px"><i class="fa-solid fa-circle-info" style="margin-right:4px"></i>共检索到 <strong>1,847</strong> 条记录。</div>';
+  html+='<table class="detail-table"><thead><tr><th>序号</th><th>工单编号</th><th>创建时间</th><th>诉求归属地</th><th>诉求类型</th><th>诉求来源</th><th>诉求内容</th><th>诉求归口</th><th>关键词</th></tr></thead><tbody>';
+  rows.forEach(function(r,i){html+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;font-size:11px"><a class="drill-link" onclick="showOrderDetail(\''+r.no+'\')">'+r.no+'</a></td><td style="font-size:11px">'+r.tm+'</td><td>'+r.area+'</td><td><span class="tag tag-indigo">'+r.type+'</span></td><td>'+r.src+'</td><td title="'+r.content+'">'+r.content.slice(0,25)+'…</td><td>'+r.dept+'</td><td style="font-size:11px">'+r.kw+'</td></tr>'});
+  html+='</tbody></table>';
+  html+='<div class="detail-pagination"><span>显示 1-6 / 共 1,847 条</span><div style="display:flex;gap:4px"><button class="btn btn-sm btn-primary" style="width:26px;height:26px;padding:0">1</button><button class="btn btn-sm btn-default" style="width:26px;height:26px;padding:0">2</button><button class="btn btn-sm btn-default" style="width:26px;height:26px;padding:0">3</button><button class="btn btn-sm btn-default" style="width:26px;height:26px;padding:0">…</button></div></div>';
+  html+='</div>';
+  return html;
+}
+
+function switchPanoTab(tab,id){
+  var sec=tab.closest('.panorama-section');
+  sec.querySelectorAll('.panorama-tab').forEach(function(t){t.classList.remove('active')});tab.classList.add('active');
+  sec.querySelectorAll('.panorama-pane').forEach(function(p){p.classList.remove('active')});
+  var target=sec.querySelector('#'+id);
+  if(!target) target=document.getElementById(id);
+  if(target) target.classList.add('active');
+  // Render charts after pane is visible
+  setTimeout(function(){renderPanoCharts(sec)},50);
+}
+
+function renderPanoCharts(container){
+  // Helper: init or resize chart on elements matching ID suffix
+  function doChart(suffix,optFn){
+    container.querySelectorAll('[id$="'+suffix+'"]').forEach(function(el){
+      if(el.offsetWidth===0||el.offsetHeight===0) return;
+      if(el._ec){el._ec.resize();return}
+      var c=echarts.init(el);c.setOption(optFn());el._ec=c;
+      window.addEventListener('resize',function(){c.resize()});
+    });
+  }
+
+  doChart('_type_pie',function(){return{tooltip:{trigger:'item'},color:['#6366F1','#06B6D4','#EF4444','#F59E0B','#9CA3AF'],series:[{type:'pie',radius:['38%','66%'],center:['50%','52%'],label:{formatter:'{b}\n{d}%',fontSize:11},data:[{value:689,name:'咨询'},{value:523,name:'求助'},{value:312,name:'投诉举报'},{value:198,name:'意见建议'},{value:125,name:'其他'}]}]}});
+
+  doChart('_source_pie',function(){return{tooltip:{trigger:'item',formatter:'{b}: {c}件 ({d}%)'},color:['#3B5998','#6B8DD6','#B8C9E8','#D4D4D4'],series:[{type:'pie',radius:['40%','68%'],center:['50%','52%'],label:{formatter:'{b}\n{c}件',fontSize:11},data:[{value:1180,name:'电话'},{value:340,name:'互联网'},{value:225,name:'承办转办'},{value:102,name:'其他'}]}]}});
+
+  doChart('_area_bar',function(){return{tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},grid:{left:110,right:30,top:10,bottom:20},yAxis:{type:'category',data:['周庄镇','锦溪镇','淀山湖镇','巴城镇','张浦镇','周市镇','陆家镇','花桥经济开发区','千灯镇','高新区','开发区'],axisLabel:{fontSize:10},inverse:true},xAxis:{type:'value',axisLabel:{fontSize:10}},color:['#6366F1'],series:[{type:'bar',data:[8,12,15,28,35,38,42,48,52,68,76],barWidth:18,itemStyle:{borderRadius:[0,4,4,0]},label:{show:true,position:'right',fontSize:10,fontWeight:600}}]}});
+
+  doChart('_area_heat',function(){
+    var areas2=['开发区','高新区','千灯镇','花桥','陆家镇','周市镇','张浦镇','巴城镇','淀山湖','锦溪镇','周庄镇'];
+    var types2=['求助','咨询','投诉','建议','其他'];
+    var hdata=[];areas2.forEach(function(a,ai){types2.forEach(function(t,ti){hdata.push([ti,ai,Math.floor(Math.random()*60+5)])})});
+    return{tooltip:{position:'top',formatter:function(p){return areas2[p.value[1]]+' · '+types2[p.value[0]]+'：'+p.value[2]+'件'}},grid:{left:80,right:20,top:10,bottom:40},xAxis:{type:'category',data:types2,axisLabel:{fontSize:10},splitArea:{show:true}},yAxis:{type:'category',data:areas2,axisLabel:{fontSize:10},splitArea:{show:true}},visualMap:{min:5,max:65,calculable:true,orient:'horizontal',left:'center',bottom:0,itemWidth:10,itemHeight:80,textStyle:{fontSize:10},inRange:{color:['#EEF2FF','#C7D2FE','#818CF8','#6366F1','#4338CA']}},series:[{type:'heatmap',data:hdata,label:{show:true,fontSize:9},emphasis:{itemStyle:{shadowBlur:10,shadowColor:'rgba(0,0,0,.3)'}}}]};
+  });
+}
+
+/* ========== AI REPLIES ========== */
+var R={};
+
+R['诉求服务总量']=function(){
+  return{steps:['用户字面不含明确归口，字面匹配到主体：<strong>诉求服务</strong>','用户字面不含明确街道/镇，提取到的时间范围：<strong>2026年4月1日 至 2026年4月9日</strong>','提取到的诉求类型：<strong>求助、投诉、举报、建议、咨询、其他、表扬</strong>','归口查询检测完成 → 二级归口相似性检索成功，检索到 <strong>35</strong> 条结果','三级归口相似性检索成功，检索到 <strong>40</strong> 条结果','提取到用户查询中可能涉及的归口路径：<br>1. 物业服务>物业管理>物业服务问题','提取到用户查询中可能涉及的一级关联词：<strong>诉求，服务，总量，工单</strong>','提取到用户查询中可能涉及的关键词组：<strong>诉求服务; 服务总量; 工单总量</strong>','执行聚合统计 → COUNT(*) GROUP BY category → 共 <strong>1,847</strong> 条记录'],
+  html:'<div style="margin-top:8px;font-size:13px;line-height:1.7"><strong>📊 本月诉求服务总量统计</strong>（截至 2026-04-09）'+
+    '<div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchCT(this,\'bar\')">柱状图</div><div class="chart-tab" onclick="switchCT(this,\'pie\')">饼图</div><div class="chart-tab" onclick="switchCT(this,\'table\')">表格</div></div>'+
+    '<div class="chart-pane active" data-type="bar"><div class="chart-el" id="ct_total_bar"></div></div>'+
+    '<div class="chart-pane" data-type="pie"><div class="chart-el" id="ct_total_pie"></div></div>'+
+    '<div class="chart-pane" data-type="table"><div style="padding:4px"><table class="result-table"><thead><tr><th>指标项</th><th>数量</th><th>环比</th></tr></thead><tbody>'+
+    '<tr><td>诉求工单总量</td><td style="font-weight:700;color:var(--indigo)">1,847</td><td><span class="tag tag-green">↑ 12.3%</span></td></tr>'+
+    '<tr><td>├ 咨询</td><td style="font-weight:600">689</td><td><span class="tag tag-green">↑ 8.5%</span></td></tr>'+
+    '<tr><td>├ 求助</td><td style="font-weight:600">523</td><td><span class="tag tag-danger">↑ 18.2%</span></td></tr>'+
+    '<tr><td>├ 投诉举报</td><td style="font-weight:600">312</td><td><span class="tag tag-warn">↓ 3.1%</span></td></tr>'+
+    '<tr><td>├ 意见建议</td><td style="font-weight:600">198</td><td><span class="tag tag-green">↑ 5.7%</span></td></tr>'+
+    '<tr><td>└ 其他</td><td style="font-weight:600">125</td><td><span class="tag tag-green">↑ 2.1%</span></td></tr>'+
+    '<tr class="total-row"><td>平均响应时长</td><td style="color:var(--teal)">2.4h</td><td><span class="tag tag-green">↓ 0.3h</span></td></tr>'+
+    '<tr class="total-row"><td>办结率</td><td style="color:var(--green)">94.2%</td><td><span class="tag tag-green">↑ 1.8%</span></td></tr></tbody></table></div></div></div>'+
+    '<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">💡 <strong>洞察：</strong>求助类工单环比增长18.2%，建议重点关注。</div>'+
+    buildPanorama()+'</div>',
+  charts:function(b){
+    initC(b,'ct_total_bar',{tooltip:{trigger:'axis'},grid:{left:50,right:20,top:20,bottom:30},xAxis:{type:'category',data:['咨询','求助','投诉举报','意见建议','其他'],axisLabel:{fontSize:11}},yAxis:{type:'value',axisLabel:{fontSize:11}},color:['#6366F1'],series:[{type:'bar',data:[689,523,312,198,125],barWidth:36,itemStyle:{borderRadius:[4,4,0,0]},label:{show:true,position:'top',fontSize:11,fontWeight:600}}]});
+    initC(b,'ct_total_pie',{tooltip:{trigger:'item',formatter:'{b}: {c}件 ({d}%)'},color:['#6366F1','#06B6D4','#EF4444','#F59E0B','#9CA3AF'],series:[{type:'pie',radius:['40%','68%'],center:['50%','50%'],label:{formatter:'{b}\\n{d}%',fontSize:11},data:[{value:689,name:'咨询'},{value:523,name:'求助'},{value:312,name:'投诉举报'},{value:198,name:'意见建议'},{value:125,name:'其他'}]}]});
+    setTimeout(function(){renderPanoCharts(b)},200);
+  }};
+};
+
+R['消防安全']=function(){
+  var reportContent='<div class="report-stream">'+
+    '<h4><i class="fa-solid fa-chart-simple"></i> 一、诉求总览</h4><p>2026年4月，全市共受理消防安全相关诉求 <a class="drill-link" onclick="drillDown(\'total127\')"><strong>127</strong></a> 件，环比增长 9.5%。其中火灾隐患举报<a class="drill-link" onclick="drillDown(\'fire42\')"><strong>42</strong></a>件（占33.1%），消防设施报修<a class="drill-link" onclick="drillDown(\'equip38\')"><strong>38</strong></a>件（占29.9%），消防通道占用31件（占24.4%），消防知识咨询16件（占12.6%）。</p>'+
+    '<div class="chart-area" style="margin:10px 0"><div class="chart-tabs"><div class="chart-tab active" onclick="switchCT(this,\'pie\')">饼图</div><div class="chart-tab" onclick="switchCT(this,\'bar\')">柱状图</div></div><div class="chart-pane active" data-type="pie"><div class="chart-el" id="ct_rpt_pie"></div></div><div class="chart-pane" data-type="bar"><div class="chart-el" id="ct_rpt_bar"></div></div></div>'+
+    '<h4><i class="fa-solid fa-fire"></i> 二、热点分析</h4><p>本月消防安全诉求热点集中在"消防通道占用""电动车充电安全""消防设施老化"三个领域。其中"消防通道占用"连续3个月位列首位，反映该问题治理仍需加强。</p>'+
+    '<h4><i class="fa-solid fa-map-location-dot"></i> 三、区域分析</h4><p>A区诉求量最高（<a class="drill-link" onclick="drillDown(\'areaA35\')"><strong>35</strong></a>件，占27.6%），其次为B区（<a class="drill-link" onclick="drillDown(\'areaB28\')"><strong>28</strong></a>件）和C区（24件）。A区诉求集中在老旧小区消防设施改造方面，D区、E区诉求量相对较少但增速明显。</p>'+
+    '<h4><i class="fa-solid fa-user"></i> 四、诉求人分析</h4><p>诉求人以小区业主为主（占68.5%），其次为物业管理人员（占15.7%）和社区工作者（占10.2%）。重复诉求人8人，主要集中在A区某老旧小区。</p>'+
+    '<h4><i class="fa-solid fa-book-open"></i> 五、典型案例</h4>'+
+    '<div style="border:1px solid var(--border-light);border-radius:8px;padding:12px;margin:8px 0;font-size:12px;background:var(--bg-page)">'+
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px"><span><strong>案例工单编号：</strong><a class="drill-link" onclick="showOrderDetail(\'DH0583260205012\')">DH0583260205012</a></span><span><strong>诉求分类：</strong><span class="tag tag-danger">投诉举报</span></span><span><strong>事发地区：</strong>开发区</span></div>'+
+      '<div style="margin-bottom:6px"><strong>案例内容：</strong>开发区某小区地下车库消防管道漏水3个月未修复，多次反映物业均未处理，经12345协调后48小时内完成抢修。</div>'+
+      '<div style="margin-bottom:6px"><strong>根因分析：</strong>物业维修资金使用审批流程过长，缺乏应急维修绿色通道。</div>'+
+      '<div><strong>对策建议：</strong>建立消防设施应急维修快速响应机制，简化小额维修资金审批流程。</div>'+
+    '</div>'+
+    '<div style="border:1px solid var(--border-light);border-radius:8px;padding:12px;margin:8px 0;font-size:12px;background:var(--bg-page)">'+
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px"><span><strong>案例工单编号：</strong><a class="drill-link" onclick="showOrderDetail(\'ZB0583260212034\')">ZB0583260212034</a></span><span><strong>诉求分类：</strong><span class="tag tag-danger">投诉举报</span></span><span><strong>事发地区：</strong>高新区</span></div>'+
+      '<div style="margin-bottom:6px"><strong>案例内容：</strong>高新区某商铺长期占用消防通道堆放货物，多次投诉后由城管执法部联合消防部门现场清理。</div>'+
+      '<div style="margin-bottom:6px"><strong>根因分析：</strong>商铺经营空间不足，缺乏替代仓储方案，同时巡查力度不够。</div>'+
+      '<div><strong>对策建议：</strong>加大日常巡查频次，对多次违规的商铺纳入重点监管名单。</div>'+
+    '</div>'+
+    '<h4><i class="fa-solid fa-lightbulb"></i> 六、改进措施及建议</h4><p>1. 加大老旧小区消防设施改造投入，优先安排A区高频诉求小区。<br>2. 建立消防通道常态化巡查机制，对反复占用的点位实施重点监控。<br>3. 加强电动车充电安全宣传，推动集中充电设施建设。<br>4. 建立消防安全诉求"红黄蓝"预警机制。</p></div>';
+
+  return{steps:['用户字面匹配到主体：<strong>消防安全</strong>','用户字面不含明确街道/镇','提取到的时间范围：<strong>2026年4月1日 至 2026年4月9日</strong>','提取到的诉求类型：<strong>求助、投诉、举报、建议、咨询、其他、表扬</strong>','归口查询检测完成 → 二级归口相似性检索成功，检索到 <strong>18</strong> 条结果','提取到用户查询中可能涉及的归口路径：<br>1. 消防安全>消防设施>设施维护<br>2. 消防安全>消防通道>通道占用','提取到的关键词组：<strong>消防安全; 火灾隐患; 消防通道; 消防设施</strong>','分析模型 → 专题报告生成（流式输出），共检索到 <strong>127</strong> 条记录'],
+  html:'<div style="margin-top:8px;font-size:13px;line-height:1.7"><strong>📝 消防安全相关诉求专题报告</strong>'+
+    '<div class="report-card"><div class="rc-header"><div class="rc-icon"><i class="fa-solid fa-file-lines"></i></div><div><div class="rc-title">2026年4月消防安全相关诉求分析报告</div><div class="rc-meta">生成时间：2026-04-09 · 数据范围：2026.04.01~04.09 · 共127条相关工单</div></div></div>'+
+    reportContent+
+    '<div class="rc-actions"><button class="btn btn-gradient btn-sm" onclick="toast(\'下载中：消防安全诉求报告.docx\',\'success\')"><i class="fa-solid fa-file-word"></i> 下载 Word</button><button class="btn btn-outline-indigo btn-sm" onclick="toast(\'下载中：消防安全诉求报告.pdf\',\'success\')"><i class="fa-solid fa-file-pdf"></i> 下载 PDF</button><button class="btn btn-default btn-sm" onclick="previewReport()"><i class="fa-solid fa-eye"></i> 报告预览</button></div></div>'+
+    buildPanorama()+'</div>',
+  charts:function(b){
+    initC(b,'ct_rpt_pie',{tooltip:{trigger:'item'},color:['#EF4444','#6366F1','#F59E0B','#06B6D4'],series:[{type:'pie',radius:['38%','65%'],center:['50%','52%'],label:{formatter:'{b}\\n{c}件',fontSize:11},data:[{value:42,name:'火灾隐患'},{value:38,name:'设施报修'},{value:31,name:'通道占用'},{value:16,name:'知识咨询'}]}]});
+    initC(b,'ct_rpt_bar',{tooltip:{trigger:'axis'},grid:{left:80,right:20,top:10,bottom:30},yAxis:{type:'category',data:['知识咨询','通道占用','设施报修','火灾隐患'],inverse:true},xAxis:{type:'value'},color:['#6366F1'],series:[{type:'bar',data:[16,31,38,42],barWidth:20,itemStyle:{borderRadius:[0,4,4,0]},label:{show:true,position:'right',fontSize:11,fontWeight:600,formatter:'{c}件'}}]});
+    setTimeout(function(){renderPanoCharts(b)},200);
+  }};
+};
+
+R['类型诉求占比']=function(){return{steps:['用户字面匹配到主体：<strong>诉求类型</strong>','用户字面不含明确街道/镇','提取到的时间范围：<strong>2026年4月1日 至 2026年4月9日</strong>','提取到的诉求类型：<strong>求助、投诉、举报、建议、咨询、其他</strong>','归口查询检测完成 → 全归口扫描','提取到的关键词组：<strong>类型; 占比; 分布; 分析</strong>','执行 GROUP BY type → 计算占比 → 共 <strong>1,847</strong> 条记录'],html:'<div style="margin-top:8px"><strong>📊 本月各类型诉求占比分析</strong>'+buildPanorama()+'</div>',charts:function(b){setTimeout(function(){renderPanoCharts(b)},200)}}};
+
+R['诉求量变化趋势']=function(){return{steps:['用户字面匹配到主体：<strong>诉求量变化</strong>','用户字面不含明确街道/镇','提取到的时间范围：<strong>2025年11月 至 2026年4月（近6个月）</strong>','提取到的诉求类型：<strong>全部类型</strong>','归口查询 → 全归口','提取到的关键词组：<strong>趋势; 变化; 诉求量; 月度</strong>','按月聚合 → GROUP BY month → 计算环比增长率'],
+  html:'<div style="margin-top:8px"><strong>📈 近6个月诉求量变化趋势</strong><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchCT(this,\'line\')">折线图</div><div class="chart-tab" onclick="switchCT(this,\'bar\')">柱状图</div><div class="chart-tab" onclick="switchCT(this,\'table\')">表格</div></div><div class="chart-pane active" data-type="line"><div class="chart-el" id="ct_trend_line"></div></div><div class="chart-pane" data-type="bar"><div class="chart-el" id="ct_trend_bar"></div></div><div class="chart-pane" data-type="table"><div style="padding:4px"><table class="result-table"><thead><tr><th>月份</th><th>总量</th><th>环比</th><th>求助</th><th>投诉</th><th>办结率</th></tr></thead><tbody><tr><td>2025-11</td><td>1,523</td><td>—</td><td>385</td><td>210</td><td>91.2%</td></tr><tr><td>2025-12</td><td>1,410</td><td><span class="tag tag-warn">↓7.4%</span></td><td>362</td><td>198</td><td>92.1%</td></tr><tr><td>2026-01</td><td>1,298</td><td><span class="tag tag-warn">↓7.9%</span></td><td>341</td><td>185</td><td>91.8%</td></tr><tr><td>2026-02</td><td>1,456</td><td><span class="tag tag-green">↑12.2%</span></td><td>398</td><td>215</td><td>93.4%</td></tr><tr><td>2026-03</td><td>1,645</td><td><span class="tag tag-green">↑13.0%</span></td><td>442</td><td>265</td><td>93.8%</td></tr><tr><td style="font-weight:600">2026-04</td><td style="font-weight:700;color:var(--indigo)">1,847</td><td><span class="tag tag-green">↑12.3%</span></td><td style="color:var(--red)">523</td><td>312</td><td>94.2%</td></tr></tbody></table></div></div></div><div style="margin-top:8px;font-size:12px;color:var(--text-muted)">💡 2月起持续攀升，4月求助量创新高。</div></div>',
+  charts:function(b){
+    initC(b,'ct_trend_line',{tooltip:{trigger:'axis'},legend:{data:['诉求总量','求助','投诉举报'],bottom:0,textStyle:{fontSize:11}},grid:{left:50,right:20,top:20,bottom:40},xAxis:{type:'category',data:['11月','12月','1月','2月','3月','4月'],axisLabel:{fontSize:11}},yAxis:{type:'value',axisLabel:{fontSize:11}},color:['#6366F1','#06B6D4','#EF4444'],series:[{name:'诉求总量',type:'line',smooth:true,data:[1523,1410,1298,1456,1645,1847],areaStyle:{color:'rgba(99,102,241,.08)'}},{name:'求助',type:'line',smooth:true,data:[385,362,341,398,442,523]},{name:'投诉举报',type:'line',smooth:true,data:[210,198,185,215,265,312]}]});
+    initC(b,'ct_trend_bar',{tooltip:{trigger:'axis'},grid:{left:50,right:20,top:20,bottom:30},xAxis:{type:'category',data:['11月','12月','1月','2月','3月','4月'],axisLabel:{fontSize:11}},yAxis:{type:'value',axisLabel:{fontSize:11}},color:['#6366F1'],series:[{type:'bar',data:[1523,1410,1298,1456,1645,1847],barWidth:30,itemStyle:{borderRadius:[4,4,0,0]},label:{show:true,position:'top',fontSize:10,fontWeight:600}}]});
+  }}};
+
+R['响应时效']=function(){return{steps:['用户字面匹配到主体：<strong>响应时效</strong>','用户字面不含明确归口','提取到的时间范围：<strong>2026年4月1日 至 2026年4月9日</strong>','提取到的诉求区域：<strong>全部区域（按区域分组对比）</strong>','提取到的关键词组：<strong>响应; 时效; 对比; 达标率</strong>','执行 AVG(响应时间) GROUP BY area → 计算2h达标率'],
+  html:'<div style="margin-top:8px"><strong>📊 各区域诉求响应时效对比</strong><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchCT(this,\'bar\')">柱状图</div><div class="chart-tab" onclick="switchCT(this,\'table\')">表格</div></div><div class="chart-pane active" data-type="bar"><div class="chart-el" id="ct_resp_bar"></div></div><div class="chart-pane" data-type="table"><div style="padding:4px"><table class="result-table"><thead><tr><th>区域</th><th>工单量</th><th>平均响应(h)</th><th>2h达标率</th><th>评级</th><th>操作</th></tr></thead><tbody><tr><td>开发区</td><td>412</td><td style="color:var(--green);font-weight:600">1.6</td><td>96.8%</td><td><span class="tag tag-green">优秀</span></td><td><a class="drill-link" onclick="drillDown(\'a\')">下钻</a></td></tr><tr><td>高新区</td><td>389</td><td style="color:var(--green);font-weight:600">1.9</td><td>93.2%</td><td><span class="tag tag-green">良好</span></td><td><a class="drill-link" onclick="drillDown(\'b\')">下钻</a></td></tr><tr><td>千灯镇</td><td>356</td><td style="color:var(--yellow);font-weight:600">2.5</td><td>87.4%</td><td><span class="tag tag-warn">一般</span></td><td><a class="drill-link" onclick="drillDown(\'c\')">下钻</a></td></tr><tr><td>花桥经济开发区</td><td>378</td><td style="color:var(--red);font-weight:600">3.1</td><td>78.6%</td><td><span class="tag tag-danger">待改进</span></td><td><a class="drill-link" onclick="drillDown(\'d\')">下钻</a></td></tr><tr><td>陆家镇</td><td>312</td><td style="color:var(--yellow);font-weight:600">2.3</td><td>89.1%</td><td><span class="tag tag-warn">一般</span></td><td><a class="drill-link" onclick="drillDown(\'e\')">下钻</a></td></tr></tbody></table></div></div></div><div style="margin-top:8px;font-size:12px;color:var(--text-muted)">💡 花桥经济开发区平均响应3.1h，达标率仅78.6%，建议增配人力。</div></div>',
+  charts:function(b){initC(b,'ct_resp_bar',{tooltip:{trigger:'axis'},legend:{data:['平均响应(h)','达标率(%)'],bottom:0,textStyle:{fontSize:11}},grid:{left:50,right:50,top:20,bottom:40},xAxis:{type:'category',data:['开发区','高新区','千灯镇','花桥','陆家镇'],axisLabel:{fontSize:11}},yAxis:[{type:'value',name:'时长(h)',max:4},{type:'value',name:'达标率(%)',min:70,max:100}],color:['#6366F1','#10B981'],series:[{name:'平均响应(h)',type:'bar',data:[1.6,1.9,2.5,3.1,2.3],barWidth:28,itemStyle:{borderRadius:[4,4,0,0]}},{name:'达标率(%)',type:'line',yAxisIndex:1,smooth:true,data:[96.8,93.2,87.4,78.6,89.1]}]})}}};
+
+R['超时']=function(){return{steps:['用户字面匹配到主体：<strong>超时工单</strong>','提取到的时间范围：<strong>2026年4月（本月）</strong>','筛选条件 → 状态≠已办结 AND 已超时限','提取到的关键词组：<strong>超时; 未办结; 工单; 统计</strong>','归口查询 → 全归口，区域 → 全区域','执行查询 → 共检索到 <strong>37</strong> 条超时记录'],html:'<div style="margin-top:8px"><strong>⚠️ 本月超时未办结工单统计</strong><br><span style="font-size:12px;color:var(--text-muted)">共 <strong style="color:var(--red)">37</strong> 件超时</span><div class="result-table-wrap" style="margin-top:8px"><table class="result-table"><thead><tr><th>工单号</th><th>类型</th><th>区域</th><th>超时</th><th>归口</th><th>操作</th></tr></thead><tbody><tr><td style="font-family:monospace;font-size:11px">SQ-2026-04-0231</td><td><span class="tag tag-danger">投诉</span></td><td>花桥</td><td style="color:var(--red);font-weight:600">5天</td><td>城管执法</td><td><a class="drill-link" onclick="drillDown(\'ot\')">查看</a></td></tr><tr><td style="font-family:monospace;font-size:11px">SQ-2026-04-0187</td><td><span class="tag tag-danger">投诉</span></td><td>千灯镇</td><td style="color:var(--red);font-weight:600">4天</td><td>环保监察</td><td><a class="drill-link" onclick="drillDown(\'ot\')">查看</a></td></tr><tr><td style="font-family:monospace;font-size:11px">SQ-2026-04-0298</td><td><span class="tag tag-orange">求助</span></td><td>花桥</td><td style="color:var(--orange);font-weight:600">3天</td><td>市政管理</td><td><a class="drill-link" onclick="drillDown(\'ot\')">查看</a></td></tr><tr><td style="font-family:monospace;font-size:11px">SQ-2026-04-0165</td><td><span class="tag tag-danger">投诉</span></td><td>花桥</td><td style="color:var(--orange);font-weight:600">3天</td><td>交通管理</td><td><a class="drill-link" onclick="drillDown(\'ot\')">查看</a></td></tr></tbody></table></div><div style="margin-top:6px;text-align:center"><a class="drill-link" onclick="drillDown(\'allOT\')" style="font-size:12px">查看全部 37 条 →</a></div><div style="margin-top:8px;font-size:12px;color:var(--text-muted)">💡 花桥区超时占48.6%，建议督办。</div></div>'}};
+
+R['物业服务质量']=function(){return{steps:['用户字面匹配到主体：<strong>物业服务质量</strong>','用户字面不含明确街道/镇','提取到的时间范围：<strong>2026年4月1日 至 2026年4月9日</strong>','归口查询 → 二级归口匹配：物业管理>物业服务问题','提取到的关键词组：<strong>物业; 服务; 质量; 分析; 报告</strong>','分析模型 → 专题报告（流式输出），检索到 <strong>256</strong> 条记录'],
+  html:'<div style="margin-top:8px"><strong>📝 物业服务质量分析报告</strong><div class="report-card"><div class="rc-header"><div class="rc-icon"><i class="fa-solid fa-building"></i></div><div><div class="rc-title">2026年4月物业服务质量分析报告</div><div class="rc-meta">覆盖 256 条工单 · 流式生成</div></div></div><div class="report-stream"><h4><i class="fa-solid fa-chart-simple"></i> 一、诉求总览</h4><p>本月物业服务相关诉求<a class="drill-link" onclick="drillDown(\'wy256\')"><strong>256</strong></a>件，办结243件，办结率94.9%，综合满意度4.2/5.0。</p><h4><i class="fa-solid fa-fire"></i> 二、热点分析</h4><p>投诉热点：电梯故障(<a class="drill-link" onclick="drillDown(\'dt32\')"><strong>32</strong></a>件)、保洁质量(<a class="drill-link" onclick="drillDown(\'bj28\')"><strong>28</strong></a>件)、绿化养护(21件)，三者合计占比31.6%。</p><h4><i class="fa-solid fa-map-location-dot"></i> 三、区域分析</h4><p>开发区诉求最多(68件)，高新区次之(52件)。开发区集中在世茂、中南等大型社区。</p>'+
+  '<h4><i class="fa-solid fa-book-open"></i> 四、典型案例</h4>'+
+  '<div style="border:1px solid var(--border-light);border-radius:8px;padding:12px;margin:8px 0;font-size:12px;background:var(--bg-page)"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px"><span><strong>案例工单编号：</strong><a class="drill-link" onclick="showOrderDetail(\'WY058326040312\')">WY058326040312</a></span><span><strong>诉求分类：</strong><span class="tag tag-danger">投诉举报</span></span><span><strong>事发地区：</strong>开发区</span></div><div style="margin-bottom:6px"><strong>案例内容：</strong>世茂小区电梯频繁故障停运，物业多次维修未根本解决，居民出行受严重影响。</div><div style="margin-bottom:6px"><strong>根因分析：</strong>电梯使用年限超10年，部件老化严重，物业维保合同到期后未及时续签。</div><div><strong>对策建议：</strong>推动电梯大修基金使用，加快老旧电梯更新改造。</div></div>'+
+  '<h4><i class="fa-solid fa-lightbulb"></i> 五、改进建议</h4><p>1. 加强电梯维保巡检频次。2. 优化保洁服务标准与考核。3. 推进绿化精细化管理。</p></div><div class="rc-actions"><button class="btn btn-gradient btn-sm" onclick="toast(\'下载中…\',\'success\')"><i class="fa-solid fa-file-word"></i> 下载Word</button><button class="btn btn-outline-indigo btn-sm" onclick="toast(\'下载中…\',\'success\')"><i class="fa-solid fa-file-pdf"></i> 下载PDF</button><button class="btn btn-default btn-sm" onclick="previewReport()"><i class="fa-solid fa-eye"></i> 报告预览</button></div></div>'+buildPanorama()+'</div>',
+  charts:function(b){setTimeout(function(){renderPanoCharts(b)},200)}}};
+
+R['工单处理量排名']=function(){return{steps:['用户字面匹配到主体：<strong>工单处理量</strong>','用户字面不含明确街道/镇','提取到的时间范围：<strong>2026年4月（本月）</strong>','提取到的诉求类型：<strong>全部类型</strong>','归口查询 → 全归口，按部门分组','提取到的关键词组：<strong>工单; 处理量; 排名; 部门</strong>','执行 COUNT(*) GROUP BY dept ORDER BY count DESC'],html:'<div style="margin-top:8px"><strong>🏆 各部门工单处理量排名</strong><div class="chart-area"><div class="chart-tabs"><div class="chart-tab active" onclick="switchCT(this,\'bar\')">条形图</div><div class="chart-tab" onclick="switchCT(this,\'table\')">表格</div></div><div class="chart-pane active" data-type="bar"><div class="chart-el" id="ct_rank_bar"></div></div><div class="chart-pane" data-type="table"><div style="padding:4px"><table class="result-table"><thead><tr><th>排名</th><th>部门</th><th>受理量</th><th>办结</th><th>办结率</th><th>操作</th></tr></thead><tbody><tr><td>🥇</td><td>综合服务部</td><td style="font-weight:700">482</td><td>468</td><td><span class="tag tag-green">97.1%</span></td><td><a class="drill-link" onclick="drillDown(\'d1\')">下钻</a></td></tr><tr><td>🥈</td><td>市政管理部</td><td style="font-weight:700">398</td><td>372</td><td><span class="tag tag-green">93.5%</span></td><td><a class="drill-link" onclick="drillDown(\'d2\')">下钻</a></td></tr><tr><td>🥉</td><td>城管执法部</td><td style="font-weight:700">356</td><td>338</td><td><span class="tag tag-green">94.9%</span></td><td><a class="drill-link" onclick="drillDown(\'d3\')">下钻</a></td></tr><tr><td>4</td><td>环保监察部</td><td>312</td><td>285</td><td><span class="tag tag-warn">91.3%</span></td><td><a class="drill-link" onclick="drillDown(\'d4\')">下钻</a></td></tr><tr><td>5</td><td>交通管理部</td><td>299</td><td>271</td><td><span class="tag tag-warn">90.6%</span></td><td><a class="drill-link" onclick="drillDown(\'d5\')">下钻</a></td></tr></tbody></table></div></div></div></div>',
+  charts:function(b){initC(b,'ct_rank_bar',{tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},grid:{left:100,right:40,top:10,bottom:30},xAxis:{type:'value'},yAxis:{type:'category',data:['交通管理部','环保监察部','城管执法部','市政管理部','综合服务部'],inverse:true},color:['#6366F1'],series:[{type:'bar',barWidth:22,data:[{value:299,itemStyle:{borderRadius:[0,4,4,0]}},{value:312,itemStyle:{borderRadius:[0,4,4,0]}},{value:356,itemStyle:{borderRadius:[0,4,4,0]}},{value:398,itemStyle:{borderRadius:[0,4,4,0]}},{value:482,itemStyle:{color:'#F59E0B',borderRadius:[0,4,4,0]}}],label:{show:true,position:'right',fontSize:11,fontWeight:600,formatter:'{c}件'}}]})}}};
+
+R['区域诉求统计']=R['类型诉求占比'];
+
+R['default']=function(){return{steps:['解析用户意图…','检索数据源…','匹配分析模型…'],html:'<div style="margin-top:8px;font-size:13px;line-height:1.7">收到！我支持以下查询：<br><br>📊 <strong>数据统计</strong> — "本月诉求总量""工单排名""超时工单"<br>📈 <strong>趋势分析</strong> — "近6个月诉求趋势""类型占比""区域时效"<br>📝 <strong>报告生成</strong> — "消防安全报告""物业质量报告"<br><br>请用更具体的描述提问。</div>'}};
+
+function getR(m){for(var k in R){if(k!=='default'&&m.indexOf(k)!==-1)return R[k]()}return R['default']()}
+function sendMsg(){var v=document.getElementById('chatInput').value.trim();if(!v)return;document.getElementById('chatInput').value='';addUser(v);var r=getR(v);addAi(r.steps,r.html,function(b){if(r.charts)r.charts(b)})}
+function sendQuick(t){document.getElementById('chatInput').value='';addUser(t);var r=getR(t);addAi(r.steps,r.html,function(b){if(r.charts)r.charts(b)})}
+
+/* ========== CHART HELPERS ========== */
+function switchCT(tab,type){var a=tab.closest('.chart-area');a.querySelectorAll('.chart-tab').forEach(function(t){t.classList.remove('active')});tab.classList.add('active');a.querySelectorAll('.chart-pane').forEach(function(p){p.classList.remove('active');if(p.dataset.type===type)p.classList.add('active')});var el=a.querySelector('.chart-pane.active .chart-el');if(el&&el._ec)el._ec.resize()}
+function initC(bubble,id,opt){setTimeout(function(){var el=bubble.querySelector('#'+id);if(!el)return;var c=echarts.init(el);c.setOption(opt);el._ec=c;window.addEventListener('resize',function(){c.resize()})},100)}
+
+/* ========== DRILL DOWN ========== */
+function drillDown(type){
+  var orders=[{no:'AP993205832602010',t:'车库装充电桩申请',f:'市民张先生',tm:'2026-04-08 14:23',st:'badge-done',sx:'已办结',dp:'综合服务部'},{no:'ZB058326020210',t:'噪音扰民投诉',f:'市民李女士',tm:'2026-04-07 09:15',st:'badge-processing',sx:'处理中',dp:'城管执法部'},{no:'ZB058326020220',t:'楼上漏水维修',f:'市民王先生',tm:'2026-04-06 22:10',st:'badge-done',sx:'已办结',dp:'市政管理部'},{no:'ZB058326020230',t:'物业锁车投诉',f:'市民赵女士',tm:'2026-04-05 16:30',st:'badge-pending',sx:'待处理',dp:'综合服务部'},{no:'ZB058326020240',t:'绿化带垃圾未清理',f:'市民陈先生',tm:'2026-04-04 11:45',st:'badge-done',sx:'已办结',dp:'综合服务部'}];
+  var body='<div style="margin-bottom:12px;display:flex;gap:8px"><input style="flex:1;height:30px;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:12px" placeholder="搜索工单号/内容…"><button class="btn btn-sm btn-primary"><i class="fa-solid fa-magnifying-glass"></i></button></div><table class="detail-table" style="font-size:12px"><thead><tr><th>工单编号</th><th>创建时间</th><th>诉求地址</th><th>诉求类型</th><th>诉求来源</th><th>诉求内容</th><th>三级归口</th><th>关键词</th></tr></thead><tbody>';
+  orders.forEach(function(o){body+='<tr><td style="font-family:monospace;font-size:11px"><a class="drill-link" onclick="event.stopPropagation();showOrderDetail(\''+o.no+'\')">'+o.no+'</a></td><td style="font-size:11px">'+o.tm+'</td><td>开发区</td><td><span class="tag tag-indigo">求助</span></td><td>'+o.f+'</td><td>'+o.t+'</td><td>'+o.dp+'</td><td style="font-size:11px">物业,服务</td></tr>'});
+  body+='</tbody></table><div style="margin-top:12px;display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text-muted)">显示 1-5 / 共 '+(50+Math.floor(Math.random()*150))+'条</span></div>';
+  document.getElementById('drillTitle').textContent='工单明细';document.getElementById('drillBody').innerHTML=body;openM('drillModal');
+}
+
+/* ========== ORDER DETAIL ========== */
+function showOrderDetail(no){
+  var html='<table style="width:100%;border-collapse:collapse;font-size:13px">'+
+    '<tr><td style="width:120px;padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">工单编号</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="2">'+no+'</td><td style="width:120px;padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">诉求来源</td><td style="padding:10px 14px;border:1px solid var(--border-light)">电话 12345</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">市民姓名</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="2">张**</td><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">联系电话</td><td style="padding:10px 14px;border:1px solid var(--border-light)">186****3000</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">创建时间</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="2">2026-04-05 18:27:01</td><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">部门计划完成时间</td><td style="padding:10px 14px;border:1px solid var(--border-light)">2026-04-08 18:27:01</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">诉求类型</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="2">咨询</td><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">紧急程度</td><td style="padding:10px 14px;border:1px solid var(--border-light)">一般</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">服务对象类型</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="2">个人</td><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">性别</td><td style="padding:10px 14px;border:1px solid var(--border-light)">男</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">回访意见</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="4">办理部门已联系并问题已解决，市民表示满意</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">诉求内容</td><td style="padding:10px 14px;border:1px solid var(--border-light);line-height:1.6" colspan="4">服务对象反映：小区地下车库消防管道漏水，已多次向物业反映但一直未修复，影响车辆停放和消防安全，希望相关部门督促处理。</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">诉求目的</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="4">希望尽快修复漏水问题，消除安全隐患。</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">诉求地址</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="4">开发区某小区地下车库B2层</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">承办单位</td><td style="padding:10px 14px;border:1px solid var(--border-light)" colspan="4">开发区综合服务中心</td></tr>'+
+    '<tr><td style="padding:10px 14px;font-weight:600;color:var(--text-muted);background:var(--bg-page);border:1px solid var(--border-light)">处理结果</td><td style="padding:10px 14px;border:1px solid var(--border-light);line-height:1.6" colspan="4">已协调物业维修部门48小时内完成消防管道修复，并对周边管道进行排查。</td></tr>'+
+    '</table>';
+  // 处理流程
+  html+='<div style="margin-top:16px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-primary)">处理流程</div>';
+  html+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="padding:8px 12px;background:var(--indigo-light);color:var(--indigo);border:1px solid var(--indigo-border);text-align:left">处理单位</th><th style="padding:8px 12px;background:var(--indigo-light);color:var(--indigo);border:1px solid var(--indigo-border);text-align:left">处理动作</th><th style="padding:8px 12px;background:var(--indigo-light);color:var(--indigo);border:1px solid var(--indigo-border);text-align:left">处理时间</th><th style="padding:8px 12px;background:var(--indigo-light);color:var(--indigo);border:1px solid var(--indigo-border);text-align:left">处理意见</th></tr></thead><tbody>';
+  html+='<tr><td style="padding:8px 12px;border:1px solid var(--border-light)">受理岗</td><td style="padding:8px 12px;border:1px solid var(--border-light)">提交审核</td><td style="padding:8px 12px;border:1px solid var(--border-light)">2026-04-05 18:27:01</td><td style="padding:8px 12px;border:1px solid var(--border-light)">已受理，转相关部门处理</td></tr>';
+  html+='<tr><td style="padding:8px 12px;border:1px solid var(--border-light)">审核派发岗</td><td style="padding:8px 12px;border:1px solid var(--border-light)">工单派发</td><td style="padding:8px 12px;border:1px solid var(--border-light)">2026-04-05 19:05:00</td><td style="padding:8px 12px;border:1px solid var(--border-light)">派发至开发区综合服务中心</td></tr>';
+  html+='<tr><td style="padding:8px 12px;border:1px solid var(--border-light)">开发区综合服务中心</td><td style="padding:8px 12px;border:1px solid var(--border-light)">答复办结</td><td style="padding:8px 12px;border:1px solid var(--border-light)">2026-04-07 16:30:00</td><td style="padding:8px 12px;border:1px solid var(--border-light)">已协调物业完成维修</td></tr>';
+  html+='<tr><td style="padding:8px 12px;border:1px solid var(--border-light)">答复审核岗</td><td style="padding:8px 12px;border:1px solid var(--border-light)">提交回访</td><td style="padding:8px 12px;border:1px solid var(--border-light)">2026-04-08 09:00:00</td><td style="padding:8px 12px;border:1px solid var(--border-light)">审核通过，提交回访</td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('drillTitle').textContent='工单详情';document.getElementById('drillBody').innerHTML=html;openM('drillModal');
+}
+
+/* ========== REPORT PREVIEW ========== */
+function previewReport(){
+  document.getElementById('reportPreviewBody').innerHTML='<div class="report-preview"><h2>关于2026年4月消防安全相关诉求的分析报告</h2><p style="text-align:center;color:var(--text-muted);font-size:12px;text-indent:0">民意诉求数据分析平台 · 2026年4月9日</p><h3>一、基本情况</h3><p>2026年4月，全市共受理消防安全相关民意诉求127件，较上月增长9.5%。其中火灾隐患举报42件，消防设施报修38件，消防通道占用31件，消防知识咨询16件。</p><h3>二、问题分析</h3><p>从诉求类型看，火灾隐患举报占比最高，达33.1%，主要集中在老旧小区电气线路老化和电动车违规充电等方面。从区域分布看，A区诉求量最高（35件），与该区域老旧小区集中有关。</p><h3>三、典型案例</h3><p>案例一：开发区某小区地下车库消防管道漏水三个月未修复，多次投诉后经12345平台协调，48小时内完成抢修。</p><p>案例二：高新区某商铺长期占用消防通道堆放货物，经城管执法部门联合消防部门现场清理整治。</p><h3>四、对策建议</h3><p>一是加大老旧小区消防设施改造投入力度，优先安排高频诉求小区。二是建立消防通道占用常态化巡查机制。三是加强电动车充电安全宣传教育。四是建立消防安全诉求预警机制。</p></div>';
+  openM('reportPreviewModal');
+}
+
+/* ========== QUICK COMMANDS (CRUD) ========== */
+var qaData={stat:[{t:'本月诉求服务总量'},{t:'工单处理量排名'},{t:'超时工单统计'},{t:'区域诉求统计'}],trend:[{t:'诉求趋势分析'},{t:'诉求类型分布'},{t:'区域时效对比'}],report:[{t:'消防安全报告'},{t:'物业质量报告'}]};
+var qaLabels={stat:{icon:'fa-calculator',name:'数据统计'},trend:{icon:'fa-chart-line',name:'趋势分析'},report:{icon:'fa-file-lines',name:'报告生成'}};
+var editCtx={type:'',idx:-1}; // for editing
+
+function renderQa(){
+  var html='';
+  for(var cat in qaData){
+    var lb=qaLabels[cat];
+    html+='<div class="qa-card"><div class="qa-card-header"><i class="fa-solid '+lb.icon+'"></i> '+lb.name;
+    if(qaData[cat].length<5) html+='<div class="qa-add" onclick="openAddQa(\''+cat+'\')" title="新增"><i class="fa-solid fa-plus"></i></div>';
+    html+='</div><div class="qa-card-body">';
+    qaData[cat].forEach(function(q,i){
+      html+='<div class="qa-btn" onclick="sendQuick(\''+q.t.replace(/'/g,"\\'")+'\')">';
+      html+='<i class="fa-solid fa-hashtag"></i>'+q.t;
+      html+='<div class="qa-ops"><div class="qa-op" onclick="event.stopPropagation();editQa(\''+cat+'\','+i+')" title="编辑"><i class="fa-solid fa-pen"></i></div><div class="qa-op del" onclick="event.stopPropagation();delQa(\''+cat+'\','+i+')" title="删除"><i class="fa-solid fa-xmark"></i></div></div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+  // Favorites
+  html+='<div class="fav-section"><div class="fav-header"><i class="fa-solid fa-bookmark" style="color:var(--indigo)"></i> 指令收藏库 <span class="fav-cnt" id="favCount">'+favorites.length+' 条</span></div><div class="fav-list" id="favList"></div></div>';
+  document.getElementById('rpBody').innerHTML=html;
+  renderFavs();
+}
+
+function openAddQa(cat){document.getElementById('addQaCat').value=cat;document.getElementById('addQaText').value='';openM('addQaModal')}
+function saveAddQa(){var cat=document.getElementById('addQaCat').value,txt=document.getElementById('addQaText').value.trim();if(!txt){toast('请输入指令','warn');return}if(qaData[cat].length>=5){toast('每个分类最多5条','warn');return}qaData[cat].push({t:txt});renderQa();closeM('addQaModal');toast('已添加','success')}
+function editQa(cat,i){editCtx={type:'qa',cat:cat,idx:i};document.getElementById('editModalTitle').textContent='编辑快捷指令';document.getElementById('editInput').value=qaData[cat][i].t;openM('editModal')}
+function delQa(cat,i){qaData[cat].splice(i,1);renderQa();toast('已删除','info')}
+
+/* ========== FAVORITES (CRUD) ========== */
+var favorites=['本月各类型诉求占比分析','各部门工单处理量排名','近6个月诉求量变化趋势'];
+function renderFavs(){
+  var el=document.getElementById('favList');if(!el)return;
+  var cnt=document.getElementById('favCount');if(cnt)cnt.textContent=favorites.length+' 条';
+  if(!favorites.length){el.innerHTML='<div class="fav-empty"><i class="fa-regular fa-bookmark"></i>暂无收藏</div>';return}
+  el.innerHTML=favorites.map(function(f,i){return '<div class="fav-item" onclick="sendQuick(\''+f.replace(/'/g,"\\'")+'\')">'+'<i class="fa-solid fa-star star"></i><span class="fav-text">'+f+'</span><div class="fav-ops"><div class="fav-op" onclick="event.stopPropagation();editFavItem('+i+')" title="编辑"><i class="fa-solid fa-pen"></i></div><div class="fav-op del" onclick="event.stopPropagation();delFav('+i+')" title="删除"><i class="fa-solid fa-xmark"></i></div></div></div>'}).join('');
+}
+function addFavorite(){var v=document.getElementById('chatInput').value.trim();if(!v){toast('请先输入问题','warn');return}if(favorites.indexOf(v)!==-1){toast('已收藏过','warn');return}favorites.push(v);renderFavs();toast('已收藏','success')}
+function delFav(i){favorites.splice(i,1);renderFavs();toast('已移除','info')}
+function editFavItem(i){editCtx={type:'fav',idx:i};document.getElementById('editModalTitle').textContent='编辑收藏指令';document.getElementById('editInput').value=favorites[i];openM('editModal')}
+function saveEdit(){var v=document.getElementById('editInput').value.trim();if(!v){toast('不能为空','warn');return}if(editCtx.type==='fav'){favorites[editCtx.idx]=v;renderFavs()}else if(editCtx.type==='qa'){qaData[editCtx.cat][editCtx.idx].t=v;renderQa()}closeM('editModal');toast('已保存','success')}
+
+/* ========== INIT ========== */
+renderConvs();renderQa();showWelcome();
+</script>
+</body>
+</html>
